@@ -55,7 +55,7 @@ else
     echo "Installing Rancher CLI"
     wget "https://releases.rancher.com/cli/v0.6.9/rancher-linux-amd64-v0.6.9.tar.gz"
     tar xzf rancher-linux-amd64-v0.6.9.tar.gz
-    mv rancher-v0.6.3/rancher /usr/local/bin
+    mv rancher-v0.6.9/rancher /usr/local/bin
 fi
 
 if rancher-compose -v; then
