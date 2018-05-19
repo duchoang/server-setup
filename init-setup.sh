@@ -49,23 +49,23 @@ else
 fi
 
 # Download rancher CLI + compose
-# if rancher -v; then
-#     echo "Rancher CLI is already installed with: $(rancher -v)"
-# else
-#     echo "Installing Rancher CLI"
-#     wget "https://releases.rancher.com/cli/v0.6.3/rancher-linux-amd64-v0.6.3.tar.gz"
-#     tar xzf rancher-linux-amd64-v0.6.3.tar.gz
-#     mv rancher-v0.6.3/rancher /usr/local/bin
-# fi
+if rancher -v; then
+    echo "Rancher CLI is already installed with: $(rancher -v)"
+else
+    echo "Installing Rancher CLI"
+    wget "https://releases.rancher.com/cli/v0.6.9/rancher-linux-amd64-v0.6.9.tar.gz"
+    tar xzf rancher-linux-amd64-v0.6.9.tar.gz
+    mv rancher-v0.6.3/rancher /usr/local/bin
+fi
 
-# if rancher-compose -v; then
-#     echo "Rancher Compose is already installed with: $(rancher-compose -v)"
-# else
-#     echo "Installing Rancher Compose"
-#     wget "https://releases.rancher.com/compose/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz"
-#     tar xzf rancher-compose-linux-amd64-v0.12.5.tar.gz
-#     mv rancher-compose-v0.12.5/rancher-compose /usr/local/bin
-# fi
+if rancher-compose -v; then
+    echo "Rancher Compose is already installed with: $(rancher-compose -v)"
+else
+    echo "Installing Rancher Compose"
+    wget "https://releases.rancher.com/compose/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz"
+    tar xzf rancher-compose-linux-amd64-v0.12.5.tar.gz
+    mv rancher-compose-v0.12.5/rancher-compose /usr/local/bin
+fi
 
 #############################################################
 
@@ -93,5 +93,43 @@ apt-get -y install ruby-full
 # Increase config system
 sysctl -w vm.max_map_count=262144
 echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf
+
+#############################################################
+
+# Block port by iptables
+
+iptables -F INPUT
+
+# allow established sessions to receive traffic
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# allow your application port
+iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# allow SSH 
+iptables -I INPUT -p tcp --dport 22 -j ACCEPT
+
+# Allow Ping
+iptables -A INPUT -p icmp --icmp-type 0 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# allow localhost 
+iptables -A INPUT -i lo -j ACCEPT
+
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+
+# block everything else 
+iptables -A INPUT -j DROP
+
+iptables-save > /etc/network/iptables.rules
+cat << EOF >> /etc/network/if-pre-up.d/firewall
+#!/bin/sh
+/sbin/iptables-restore < /etc/network/iptables.rules
+EOF
+chmod +x /etc/network/if-pre-up.d/firewall
+
+#############################################################
 
 
