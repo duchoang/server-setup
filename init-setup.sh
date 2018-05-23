@@ -1,7 +1,8 @@
 #!/bin/sh
-set -e
+set -ue
 
 SWAP_SIZE=${SWAP_SIZE:-"8"}
+SWAP_LEVEL=${SWAP_LEVEL:-"10"}
 
 # Create swap (default to 8G)
 if ! swapon -s | grep /swapfile; then
@@ -10,13 +11,15 @@ if ! swapon -s | grep /swapfile; then
     chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
+    cp /etc/fstab /etc/fstab.bak
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 fi
 
 # Set swappiness to 10
 cat /proc/sys/vm/swappiness
 
-sudo sysctl vm.swappiness=10
-echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+sudo sysctl vm.swappiness=${SWAP_LEVEL}
+echo 'vm.swappiness=${SWAP_LEVEL}' | sudo tee -a /etc/sysctl.conf
 
 #################################################################################################################
 
