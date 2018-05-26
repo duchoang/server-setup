@@ -44,11 +44,15 @@ fi
 #############################################################
 # LAUNCHING RANCHER SERVER - SINGLE CONTAINER (NON-HA) ===> http://<SERVER_IP>:8080
 
-if docker ps | grep rancher/server; then
-    echo "Rancher server is running, no need to install"
-else
-    echo "Not found rancher, trying to install rancher/server:v1.6.17"
-    docker run -d --restart=unless-stopped -p 8080:8080 --name=rancher-server rancher/server:v1.6.17
+if ! [ -z ${RANCHER+x} ]; then
+  if [ "$RANCHER" = "true" ]; then
+    if docker ps | grep rancher/server; then
+        echo "Rancher server is running, no need to install"
+    else
+        echo "Not found rancher, trying to install rancher/server:v1.6.17"
+        docker run -d --restart=unless-stopped -p 8080:8080 --name=rancher-server rancher/server:v1.6.17
+    fi
+  fi
 fi
 
 # Download rancher CLI + compose
@@ -90,6 +94,15 @@ EOL
 chmod +x /usr/local/bin/get-container
 chmod +x /usr/local/bin/stats
 
+# Copy logdocker helper script
+if ! cat /usr/local/bin/logdocker.sh; then
+  echo "Copy logdocker file ..."
+  curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/duchoang/server-setup/master/logdocker.sh > logdocker.sh
+  mv logdocker.sh /usr/local/bin/logdocker.sh
+  chmod +x /usr/local/bin/logdocker.sh
+  cat /usr/local/bin/logdocker.sh
+fi
+
 # Install ruby
 apt-get -y install ruby-full
 
@@ -100,7 +113,8 @@ echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf
 #############################################################
 
 # Block port by iptables
-
+if ! cat /etc/network/if-pre-up.d/firewall; then
+echo "Setting for iptables to block all port except 80/443/8080"
 iptables -F INPUT
 
 # allow established sessions to receive traffic
@@ -132,6 +146,7 @@ cat << EOF >> /etc/network/if-pre-up.d/firewall
 /sbin/iptables-restore < /etc/network/iptables.rules
 EOF
 chmod +x /etc/network/if-pre-up.d/firewall
+fi
 
 #############################################################
 
