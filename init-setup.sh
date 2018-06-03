@@ -4,6 +4,9 @@ set -ue
 SWAP_SIZE=${SWAP_SIZE:-"2"}
 SWAP_LEVEL=${SWAP_LEVEL:-"5"}
 
+# default to 17.03, can use 18.03
+DOCKER=${DOCKER:-"17.03"}
+
 # Create swap (default to 2G)
 if ! swapon -s | grep /swapfile; then
     echo "No swapfile, create and enable"
@@ -63,8 +66,8 @@ create_and_mount_volume "nbd3" "/storage3"
 if docker -v; then
     echo "Docker is already installed with: [$(docker -v)]"
 else
-    echo "Not found docker, trying to install docker 18.03 CE"
-    curl https://releases.rancher.com/install-docker/18.03.sh | sh
+    echo "Not found docker, trying to install docker ${DOCKER} CE"
+    curl "https://releases.rancher.com/install-docker/${DOCKER}.sh" | sh
 fi
 
 # Install docker compose from release page
