@@ -4,6 +4,8 @@ curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/duchoang/ser
 
 curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/duchoang/server-setup/master/init-setup.sh | SWAP_SIZE=2 RANCHER=false SCALEWAY=true sh
 
+curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/duchoang/server-setup/master/init-setup.sh | SWAP_SIZE=2 RANCHER=false SCALEWAY=true DOCKER=18.03 sh
+
 curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/duchoang/server-setup/master/gitlab-runner-setup.sh | SWAP_SIZE=4 \
 GITLAB=https://git.url.com/ \
 TOKEN=yyy \

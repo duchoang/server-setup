@@ -90,7 +90,8 @@ if ! [ -z ${RANCHER+x} ]; then
     else
         echo "Not found rancher, trying to install rancher/server:v1.6.17"
         mkdir -p /storage/rancher-mysql
-        docker run -d --restart=unless-stopped -p 8080:8080 -v /storage/rancher-mysql:/var/lib/mysql -e JAVA_OPTS="-Xms2048m -Xmx2048m" --name=rancher-server rancher/server:v1.6.17
+        # expose port at host 80 for rancher UI
+        docker run -d --restart=unless-stopped -p 80:8080 -v /storage/rancher-mysql:/var/lib/mysql -e JAVA_OPTS="-Xms1536m -Xmx1900m" --name=rancher-server rancher/server:v1.6.17
     fi
   fi
 fi
@@ -252,4 +253,8 @@ EOL
 
   fi
 fi
+
+mkdir /storage-temp
+chown -R 999:docker /storage-temp
+
 echo "DONE INIT SETUP !!!"
