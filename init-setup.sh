@@ -105,6 +105,9 @@ sudo nano /etc/docker/daemon.json
 ```
 
 # Download rancher CLI + compose
+# newer version:
+# https://releases.rancher.com/cli/v0.6.14/rancher-linux-amd64-v0.6.14.tar.gz
+# https://releases.rancher.com/compose/v0.12.5/rancher-compose-linux-amd64-v0.12.5.tar.gz
 if rancher -v; then
     echo "Rancher CLI is already installed with: $(rancher -v)"
 else
