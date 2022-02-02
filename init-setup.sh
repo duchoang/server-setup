@@ -88,13 +88,21 @@ if ! [ -z ${RANCHER+x} ]; then
     if docker ps | grep rancher/server; then
         echo "Rancher server is running, no need to install"
     else
-        echo "Not found rancher, trying to install rancher/server:v1.6.17"
+        echo "Not found rancher, trying to install rancher/server:v1.6.30"
         mkdir -p /storage/rancher-mysql
         # expose port at host 80 for rancher UI
-        docker run -d --restart=unless-stopped -p 80:8080 -v /storage/rancher-mysql:/var/lib/mysql -e JAVA_OPTS="-Xms1536m -Xmx1900m" --name=rancher-server rancher/server:v1.6.17
+        docker run -d --restart=unless-stopped -p 6789:8080 -v /storage/rancher-mysql:/var/lib/mysql -e JAVA_OPTS="-Xms1536m -Xmx1900m" --name=rancher-server-1.6.30 rancher/server:v1.6.30
     fi
   fi
 fi
+
+# Specify DNS servers for Docker
+sudo nano /etc/docker/daemon.json
+```
+{
+  "dns": ["8.8.8.8", "8.8.4.4"]
+}
+```
 
 # Download rancher CLI + compose
 if rancher -v; then
